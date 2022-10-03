@@ -1,0 +1,217 @@
+{% extends 'base.html' %}
+
+{% block title %}
+    {{ article.title }}
+{% endblock %}
+
+{% block link %}
+    <link rel="stylesheet" href="/static/css/{{ user.user_blog.site_style }}">
+    <link rel="stylesheet" href="/static/css/article.css">
+{% endblock %}
+
+
+{% block header %}
+    <nav class="navbar navbar-default common">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <a onclick="location='/backend/';return false " href="#">
+                    <button type="button" class="btn btn-default navbar-btn">管理</button>
+                </a>
+            </div>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="#">{{ user.blog }}</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li style="color: black"><a href="/">首页 <span class="sr-only">(current)</span></a></li>
+                    <li><a href="/">新闻 <span class="sr-only">(current)</span></a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+
+{% endblock %}
+
+{% block article %}
+    <h2 class="text-center" name="{{ article.id }}">{{ article.title }}</h2>
+    <div>
+        {{ article.content|safe }}
+    </div>
+
+    <div class="clearfix">
+        <div id="div_digg">
+            <div class="diggit up">
+                <span class="diggnum" id="digg_count">{{ article.up_num }}</span>
+            </div>
+            <div class="buryit up">
+                <span class="burynum" id="bury_count">{{ article.down_num }}</span>
+            </div>
+            <div class="clear"></div>
+            <div class="diggword" id="digg_tips"></div>
+        </div>
+    </div>
+
+
+    <div>
+        <h5>评论列表</h5>
+        <div>
+
+            <ul class="list-group">
+                {% for comment in comment_list %}
+                    <li class="list-group-item">
+                        <p>
+                            <span><a href=""># 第{{ forloop.counter }}楼</a></span>
+                            <span>{{ comment.create_time|date:'Y:m:d H:i' }}</span>
+                            <span><a href="/{{ comment.user.username }}/">{{ comment.user.username }}</a></span>
+                            <span class="pull-right replay" username="{{ comment.user.username }}"
+                                  comment="{{ comment.id }}"><a>回复</a></span>
+                        </p>
+                        {% if comment.parent_id %}
+                            <p>
+                                @{{ comment.parent.user.username }}
+                            <p>{{ comment.content }}</p>
+                            </p>
+                        {% else %}
+                            <p>
+                                {{ comment.content }}
+                            </p>
+                        {% endif %}
+
+                    </li>
+
+
+                {% endfor %}
+            </ul>
+        </div>
+    </div>
+    {% if request.user.is_authenticated %}
+        <div>
+            <p><i class="fa fa-linux" aria-hidden="true" style="margin-right: 5px"></i>发表评论</p>
+            <p class="error"></p>
+            <textarea id="id_content" cols="" style="width: 100%" rows="10">
+
+        </textarea>
+            <br>
+            <button class="btn btn-danger pull-right " id="btn-submit">提交评论</button>
+        </div>
+    {% else %}
+        <div>
+            您没有登录，请先 <a href="/login/">登录</a> 或 <a href="/register/"> 注册</a>
+        </div>
+    {% endif %}
+{% endblock %}
+
+{% block js %}
+    <script>
+        var parent_id = ''
+        // 点赞点踩写成1个事件
+        $('.up').click(function () {
+            var up = $(this).hasClass('diggit')
+            var span = $(this).children('span')
+            $.ajax({
+                url: '/up_and_down/',
+                type: 'post',
+                data: {
+                    article_id: '{{ article.id }}',
+                    up_or_down: up,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    $('#digg_tips').html(data.msg)
+                    if (data.code == 100) {
+                        span.html(Number(span.html()) + 1)
+                    }
+                }
+            })
+        })
+        $('#btn-submit').click(function () {
+            var content = $("#id_content").val()
+            if (parent_id) {// 如果是子评论，把输入框中得 @某人截断不要了
+                var i = content.indexOf('\n') // 返回括号内字符的位置
+                content = content.slice(i + 1) //把字符串从回车换行后截取，只要后面的
+            }
+            $.ajax({
+                url: '/comment/',
+                type: 'post',
+                data: {
+                    article_id: '{{ article.id}}',
+                    content: content,
+                    parent_id: parent_id,
+                    csrfmiddlewaretoken: '{{ csrf_token }}'
+                },
+                success: function (data) {
+                    console.log(data)
+                    $("#id_content").val('')
+                    if (data.code == 100) {
+                        // 把评论内容，拼接到前端 jq 的dom操作
+                        // 取出后端返回的用户名，评论内容
+                        var username = data.username
+                        var res_content = data.content
+
+                        // 字符串 ''   " "    ``:es6的语法，字符串格式化后，拼接到评论列表后端
+                        var s = ''
+                        if (parent_id) {
+                            var parent_name = data.parent_name
+                            s = `
+                    <li class="list-group-item">
+                        <p>
+                            <span class='fa fa-address-card-o'></span>
+                            <span>${username}:</span>
+                        </p>
+                           <p>@${parent_name}</p>
+                        <p>${res_content}</p>
+                    </li>
+                    `
+                        } else {
+                            s = `
+                    <li class="list-group-item">
+                        <p>
+                            <span class='fa fa-address-card-o'></span>
+                            <span>${username}:</span>
+                        </p>
+                        <p>${res_content}</p>
+                    </li>
+                    `
+                        }
+
+                        // 把格式化完成的字符串拼接到评论后面
+                        $('.list-group').append(s)
+                    } else {
+                        $('.error').html(data.msg)
+                    }
+
+                },
+                error: function (data) { // 当次请求失败了
+                    $('.error').html("小伙子，出错了")
+                }
+            })
+        })
+
+        // 点击回复按钮的事件
+        $('.replay').click(function () {
+            var name = $(this).attr('username')
+            //alert(name)
+            // 把用户名写在输入框中
+            $('#id_content').val('@' + name + '\n').focus()
+            // 父评论id号,全局变量
+            parent_id = $(this).attr('comment')
+
+        })
+
+
+    </script>
+{% endblock %}
+
+
+
+
+
+

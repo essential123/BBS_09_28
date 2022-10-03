@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/static/bootstrap-3.4.1-dist/js/bootstrap.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.4.1-dist/css/bootstrap.css">
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1 class="text-center">登录页面</h1>
+            <form id="id_form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="id_username">用户名</label>
+                    <input type="text" id="id_username" name="username" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_password">密码</label>
+                    <input type="password" id="id_password" name="password" class="form-control">
+                </div>
+                <div class="form-group">
+                    <label for="id_code">验证码</label>
+                    <div class="row">
+                        <div class="col-md-6 ">
+                            <input type="text" id="id_code" name="code" class="form-control">
+                        </div>
+                        <div class="col-md-6">
+                            <img src="/get_code/" alt="" width="300px" height="35px" id="id_img">
+                        </div>
+                    </div>
+
+                </div>
+
+                <div class="form-group text-center">
+                    <input type="button" value="登录" class="btn btn-danger" id="id_submit">
+                    <span class="text-danger error"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+
+<script>
+    $('#id_img').click(function () {
+        var timestamp = new Date().getTime()
+        $(this)[0].src = '/get_code/?t=' + timestamp
+    })
+    $('#id_submit').click(function (){
+        $.ajax({
+            url:'/login/',
+            type:'post',
+            data:{username:$('#id_username').val(),
+                password:$('#id_password').val(),
+                code:$('#id_code').val(),
+                csrfmiddlewaretoken:$('[name=csrfmiddlewaretoken]').val(),
+            },
+            success:function (data){
+                if (data.code==100){
+                    location.href='/'
+                }else{
+                    $('.error').html(data.msg)
+                }
+
+            }
+
+        })
+    })
+</script>
+</html>

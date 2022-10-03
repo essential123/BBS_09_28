@@ -1,0 +1,53 @@
+{% extends 'backend/base.html' %}
+
+{% block title %}
+    后台管理
+{% endblock %}
+{% block article %}
+    <div style="padding:20px ">
+        <div class="container-fluid">
+            <div class="row">
+                <div class="col-md-6 col-md-offset-3">
+                    <form action="" method="post" enctype="multipart/form-data">
+                        {% csrf_token %}
+                        <div class="form-group">
+                            <label for="" style="margin-right: 30px">原头像:</label>
+                            <img src="/media/{{ request.user.head }}" alt="" width="100px" height="100px">
+                        </div>
+                        <hr>
+                        <div class="form-group">
+                            <label for="id_file">新头像:
+                                <span style="padding-left: 30px">
+                                    <img src="/static/img/default.png" alt="" height="90px" width="90px"
+                                         id="id_img">
+                                </span>
+                            </label>
+                            <input type="file" name="head_file" id="id_file" accept="image/*" style="display: none">
+                        </div>
+                        <p class="text-center">
+                            <input type="submit" class="btn btn-block btn-primary" value="提交">
+                        </p>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        $('#id_file').change(function () {
+            var reader = new FileReader()
+            // 2 拿到文件对象，赋值给一个变量
+            var file = $("#id_file")[0].files[0]
+            // 3 把文件读到文件阅读器中
+            reader.readAsDataURL(file)
+            // 4 等读完后，把文件阅读器的内容写到img标签上
+            //$("#id_img")[0].src=reader.result
+            reader.onload = function () {
+                //$("#id_img")[0].src=reader.result
+                $('#id_img').attr('src', reader.result)
+            }
+        })
+    </script>
+{% endblock %}

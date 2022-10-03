@@ -1,0 +1,36 @@
+{% extends 'backend/base.html' %}
+
+{% block title %}
+    后台管理
+{% endblock %}
+{% block article %}
+
+    <table class="table table-hover table-striped">
+        <thead>
+        <tr>
+            <th>文章id</th>
+            <th>文章名</th>
+            <th>发布时间</th>
+            <th>评论数</th>
+            <th>操作</th>
+            <th>操作</th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for article in article_list %}
+            <tr>
+                <th scope="row">{{ article.id }}</th>
+                <td><a href="/{{ article.user_blog.user.username }}/articles/{{ article.id }}.html">{{ article.title }}</a></td>
+                <td>{{ article.create_time|date:'Y-m-d H-i' }}</td>
+                <td>{{ article.comment_num }}</td>
+                <td><a href="/delete/?id={{ article.id }}">删除</a></td>
+                <td><a href="/edit_article/?id={{ article.id }}">修改</a></td>
+            </tr>
+        {% endfor %}
+
+
+        </tbody>
+    </table>
+
+
+{% endblock %}

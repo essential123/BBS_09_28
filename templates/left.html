@@ -1,0 +1,51 @@
+<div>
+    <div class="panel panel-primary">
+        <div class="panel-heading text-center">
+            <h3 class="panel-title">我的标签</h3>
+        </div>
+        <div class="panel-body">
+            <div>
+                {% for tag in tag_res %}
+                    <hr>
+                    <a href="/{{ user.username }}/tag/{{ tag.0 }}.html">
+                        <span>{{ tag.1 }}</span>
+                        <span>({{ tag.2 }})</span>
+                    </a>
+                {% endfor %}
+            </div>
+
+        </div>
+    </div>
+    <div class="panel panel-danger">
+        <div class="panel-heading">
+            <h3 class="panel-title">随笔分类</h3>
+        </div>
+        <div class="panel-body">
+            <div>
+                {% for category in category_res %}
+                    <hr>
+                    <a href="/{{ user.username }}/category/{{ category.0 }}.html">
+                        <span>{{ category.1 }}</span>
+                        <span>({{ category.2 }})</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+    <div class="panel panel-warning">
+        <div class="panel-heading">
+            <h3 class="panel-title">随笔档案</h3>
+        </div>
+        <div class="panel-body">
+            <div>
+                {% for data_itme in date_res %}
+                    <hr>
+                    <a href="/{{ user.username }}/archive/{{ data_itme.0|date:'Ym' }}.html">
+                        <span>{{ data_itme.0|date:'Y年m月' }}</span>
+                        <span>({{ data_itme.1 }})</span>
+                    </a>
+                {% endfor %}
+            </div>
+        </div>
+    </div>
+</div>

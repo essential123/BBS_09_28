@@ -1,0 +1,77 @@
+{% extends 'base.html' %}
+
+{% block title %}
+{{ user.username }}的博客
+{% endblock %}
+
+{% block css %}
+
+{% endblock %}
+
+{% block link %}
+    <link rel="stylesheet" href="/static/css/{{ user.user_blog.site_style }}">
+{% endblock %}
+
+{% block header %}
+    <nav class="navbar navbar-default common">
+        <div class="container-fluid">
+            <div class="pull-right">
+                <a onclick="location='/backend/';return false " href="#">
+                <button type="button" class="btn btn-default navbar-btn">管理</button>
+                </a>
+            </div>
+            <div class="navbar-header">
+                <button type="button" class="navbar-toggle collapsed" data-toggle="collapse"
+                        data-target="#bs-example-navbar-collapse-1" aria-expanded="false">
+                    <span class="sr-only">Toggle navigation</span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                    <span class="icon-bar"></span>
+                </button>
+                <a class="navbar-brand" href="/user.user_blog/">{{ user.user_blog }}</a>
+            </div>
+            <div class="collapse navbar-collapse" id="bs-example-navbar-collapse-1">
+                <ul class="nav navbar-nav">
+                    <li style="color: black"><a href="/">首页 <span class="sr-only">(current)</span></a></li>
+                    <li><a href="/">新闻 <span class="sr-only">(current)</span></a></li>
+                </ul>
+            </div>
+
+        </div>
+    </nav>
+    </div>
+{% endblock %}
+
+{% block article %}
+    <div class="article">
+        {% for article in article_list %}
+            <hr>
+            <div class="media" style="margin: 20px">
+
+                <h4 class="media-heading"><a href="/{{ name }}/articles/{{ article.id }}.html">{{article.title }}</a></h4>
+                <hr>
+                <div class="media-body">
+                    {{ article.description }}
+                </div>
+                <div class="media-bottom pull-right" style="margin-top: 10px; " >
+                    <span>posted @</span>
+                    <span>{{ article.user_blog.user.username }}</span>
+                    <span style="margin: 5px">{{ article.create_time|date:'Y-m-d H:s ' }}</span>
+                    <span style="margin: 5px"> <i class="fa fa-thumbs-o-up" aria-hidden="true"></i> {{ article.up_num }}</span>
+                    <span style="margin: 5px"> <i class="fa fa-thumbs-o-down"
+                                                  aria-hidden="true"></i> {{ article.down_num }}</span>
+                    <span style="margin: 5px"> <i class="fa fa-commenting-o"
+                                                  aria-hidden="true"></i> {{ article.comment_num }}</span>
+                    <span><a href="/edit_article/?id={{ article.id }}">编辑</a></span>
+                </div>
+            </div>
+
+
+        {% endfor %}
+
+    </div>
+{% endblock %}
+
+{% block js %}
+
+{% endblock %}

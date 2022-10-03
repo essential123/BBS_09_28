@@ -1,0 +1,109 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Title</title>
+    <script src="https://cdn.bootcdn.net/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="/static/bootstrap-3.4.1-dist/js/bootstrap.min.js"></script>
+    <link rel="stylesheet" href="/static/bootstrap-3.4.1-dist/css/bootstrap.min.css">
+
+</head>
+<body>
+<div class="container-fluid">
+    <div class="row">
+        <div class="col-md-6 col-md-offset-3">
+            <h1 class="text-center">注册页面</h1>
+            <form id="id_form">
+                {% csrf_token %}
+                {% for item in form %}
+                    <div class="form-group">
+                        <label for="{{ item.id_for_label }}">{{ item.label }}</label>
+                        {{ item }}
+                    </div>
+                    <span class="pull-right text-danger"></span>
+                {% endfor %}
+
+                <div class="form-group">
+                    <label for="id_file">头像
+                        <img src="/static/img/default.png" alt="" height="80px" width="80px" style="margin-left: 10px"
+                             id="id_img">
+                    </label>
+                    <input type="file" id="id_file" accept='iamge/*' style="display: none">
+                </div>
+
+                <div class="form-group text-center">
+                    {# 如果input类型是submit或者button标签，放在form表单中，如果点提交，触发form的提交，如果我们写了ajax提交，会触发两次提交#}
+                    <input type="button" value="注册" class="btn btn-danger" id="id_submit">
+                    <span class="text-danger error"></span>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+    $("#id_file").change(function () {
+        var reader = new FileReader()
+        var file = $("#id_file")[0].files[0]
+        reader.readAsDataURL(file)
+        reader.onload = function () {
+            $('#id_img').attr('src', reader.result)
+        }
+    })
+    $("#id_submit").click(function () {
+        var formdata = new FormData()
+        var data = $("#id_form").serializeArray()
+        console.log(data)
+        $.each(data, function (i, v) {
+            formdata.append(v.name, v.value)
+        })
+        formdata.append('my_file', $('#id_file')[0].files[0])
+
+        $.ajax({
+            url: '/register/',
+            type: 'post',
+            processData: false,
+            contentType: false,
+            data: formdata,
+            success: function (data) {
+                console.log(data)
+                if (data.code == 100) {
+                    location.href = '/login/'
+                } else {
+                    console.log(data)
+                    // 其他标签的错误渲染
+                    $.each(data.errors, function (k, v) {
+                        if (k == '__all__') {
+                            $(".error").html(v[0])
+                        } else {
+                            $("#id_" + k).next().html(v[0]).parent().addClass('has-error')
+                        }
+
+                    })
+                    // 定时任务
+                    setTimeout(function () {
+                        $('.text-danger').html("").parent().removeClass('has-error')
+                    }, 3000)
+
+                }
+            }
+
+        })
+
+    })
+    // username输入框，失去焦点，触发ajax执行
+    $('#id_username').blur(function () {
+
+        $.ajax({
+            url: '/check_username/?username=' + $(this).val(),
+            type: 'get',
+            success: function (data) {
+                if (data.code == 100) {
+                    $('#id_username').next().html(data.msg)
+                }
+            }
+
+        })
+    })
+</script>
+</html>

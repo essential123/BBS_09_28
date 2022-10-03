@@ -1,0 +1,80 @@
+{% extends 'backend/base.html' %}
+{% block title %}
+    修改文章
+{% endblock %}
+
+{% block link %}
+    <script charset="utf-8" src="/static/kindeditor/kindeditor-all-min.js"></script>
+    <script charset="utf-8" src="/static/kindeditor/lang/zh-CN.js"></script>
+{% endblock %}
+
+{% block article %}
+    <div>
+        <h2>修改文章</h2>
+        <form action="" method="post">
+            {% csrf_token %}
+            <div class="form-group">
+                <input type="hidden" name="id" value="{{ article.id }}">
+                <label for="">标题</label>
+                <input type="text" name="title" class="form-control" value="{{ article.title }}">
+            </div>
+            <div class="form-group">
+                <label for="">内容</label>
+                <textarea name="content" id="editor_id" cols="300" rows="20">
+                    {{ article.content }}
+                </textarea>
+            </div>
+            <div class="form-group">
+                <label for="">分类</label>
+                <select class="form-control" name="category">
+                    {% for category in category_list %}
+                        {% if article.blog_category_id == category.id %}
+                            <option value="{{ category.id }}" selected>{{ category.name }}</option>
+                            {% else %}
+                            <option value="{{ category.id }}">{{ category.name }}</option>
+                        {% endif %}
+
+                    {% endfor %}
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="">标签</label>
+                <select multiple class="form-control" name="tag">
+                    {% for tag in tag_list %}
+                        {% if tag in article.blog_tag.all %}
+                        <option value="{{ tag.id }}" selected>{{ tag.name }}</option>
+                        {% else %}
+                        <option value="{{ tag.id }}">{{ tag.name }}</option>
+                        {% endif %}
+                    {% endfor %}
+                </select>
+            </div>
+            <div class="text-center">
+                <input type="submit" value="提交" class="btn btn-success">
+            </div>
+
+        </form>
+
+    </div>
+{% endblock %}
+
+{% block js %}
+    <script>
+        KindEditor.ready(function (K) {
+            window.editor = K.create('#editor_id',
+                {
+                    width: '100%',
+                    height: '500px',
+                    resizeType: 0,
+                    uploadJson: '/put_img/',
+                    filePostName: 'myfile',
+                    //额外带的参数
+                    extraFileUploadParams: {
+                        'csrfmiddlewaretoken': '{{ csrf_token }}'
+                    }
+                });
+
+        });
+    </script>
+{% endblock %}
